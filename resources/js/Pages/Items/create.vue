@@ -6,6 +6,7 @@ import {reactive} from "vue";
 import {Inertia} from "@inertiajs/inertia";
 
 import InputError from '@/Components/InputError.vue';
+import MicromodalEs from "@Components/Micromodal.vue";
 
 
 defineProps({

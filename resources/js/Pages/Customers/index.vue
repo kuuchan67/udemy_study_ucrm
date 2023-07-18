@@ -34,7 +34,7 @@ const searchCustomers = () => {
 
                             <div class="container px-5 py-10 mx-auto">
                                 <FlashMessage />
-                                <div>
+                                <div class="flex pl-4 my-4 lg:w-2/3 w-full mx-auto">
                                     <input type="text" name="search" v-model="search">
                                     <button class="bg-blue-300 text-white py-2 px-2 ml-4" @click="searchCustomers">検索</button>
                                 </div>
@@ -63,7 +63,7 @@ const searchCustomers = () => {
                                     </table>
                                 </div>
                             </div>
-                            <Pagination class="mt-6" :links="customers.links"></Pagination>
+                            <div class="lg:w-2/3 w-full mx-auto"><Pagination class="mt-6" :links="customers.links"></Pagination></div>
                         </section>
 
 
