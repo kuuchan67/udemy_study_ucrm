@@ -81,22 +81,66 @@ class PurchaseController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Purchase  $purchase
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
     public function show(Purchase $purchase)
     {
-        //
+        //小計
+        $items = Order::where('id', $purchase->id)->get();
+        //合計
+        $order =  Order::groupBy('id')
+            ->where('id', $purchase->id)
+            ->selectRaw('id, sum(subtotal) as total,
+                    customer_name, status, created_at')
+            ->get();
+
+        return Inertia::render('Purchases/show', [
+            "items" => $items,
+            "order" => $order
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Purchase  $purchase
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
     public function edit(Purchase $purchase)
     {
-        //
+        $p = Purchase::find($purchase->id);
+        $allitems = Item::select('id', 'name', 'price')
+        ->get();
+        $items = [];
+        foreach ($allitems as $allitem) {
+            $quantity = 0;
+            foreach ($p->items as $item) {
+                if ($allitem->id === $item->id)  {
+                    $quantity = $item->pivot->quantity;
+
+                }
+            }
+            array_push($items, [
+                'id' => $allitem->id,
+                'name' => $allitem->name,
+                'price' => $allitem->price,
+                'quantity' => $quantity,
+            ]);
+
+
+
+        }
+        $order =  Order::groupBy('id')
+            ->where('id', $purchase->id)
+            ->selectRaw('id, customer_id,
+                    customer_name, status, created_at')
+            ->get();
+
+        return Inertia::render('Purchases/edit', [
+            'items' => $items,
+            'order' => $order,
+        ]);
+
     }
 
     /**
@@ -104,11 +148,33 @@ class PurchaseController extends Controller
      *
      * @param  \App\Http\Requests\UpdatePurchaseRequest  $request
      * @param  \App\Models\Purchase  $purchase
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdatePurchaseRequest $request, Purchase $purchase)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $purchase->status = $request->post("status");
+            $purchase->save();
+
+            $items = [];
+            foreach ($request->post("items") as $item) {
+
+                $items[$item['id']] = [
+                    'quantity' => $item['quantity'],
+                ];
+            }
+            $purchase->items()->sync($items);
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollBack();
+        }
+
+        return to_route("dashboard");
+
+
+
     }
 
     /**
