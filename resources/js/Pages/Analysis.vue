@@ -6,6 +6,7 @@ import {getToday} from "@/common";
 import axios from "axios";
 import {Link} from "@inertiajs/inertia-vue3";
 import Chart from "@/Components/Chart.vue";
+import ResultTable from "@/Components/ResultTable.vue";
 
 onMounted( () => {
     form.startDate = getToday();
@@ -33,6 +34,7 @@ const getData = async() => {
                 data.data = res.data.data;
                 data.labels = res.data.labels;
                 data.totals = res.data.totals;
+                data.type = res.data.type;
                 console.log(res.data.data);
             })
     } catch (e) {
@@ -59,30 +61,25 @@ const getData = async() => {
                             From:<input type="date" name="startDate" v-model="form.startDate"/>
                             To:<input  type="date" name="endDate" v-model="form.endDate"/>
                             <div class="p-2 w-full">
+                                <p>分析方法</p>
+                                <input type="radio" id="perDay" v-model="form.type" value="perDay"
+                                       checked><label for="perDay" class="mr-4">日別</label>
+                                <input type="radio" id="perMonty" v-model="form.type" value="perMonth"
+                                       ><label for="perMonty" class="mr-4">月別</label>
+                                <input type="radio" id="perYear" v-model="form.type" value="perYear"
+                                       ><label for="perYear" class="mr-4">年別</label>
+                                <input type="radio" id="decile" v-model="form.type" value="decile"
+                                ><label for="decile" class="mr-4">デシル</label>
+                            </div>
+                            <div class="p-2 w-full">
                                 <button class="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">分析</button>
                             </div>
                         </form>
                         <div v-show="data.data">
                         <Chart :data="data" />
+                        <ResultTable :data="data" />
                         </div>
-                        <div v-show="data.data" class="bg-white lg:w-2/3 w-full mx-auto overflow-auto">
-                            <table class="table-auto w-full text-left whitespace-no-wrap">
-                                <thead>
-                                <tr>
-                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">日付</th>
-                                    <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">金額</th>
-                                </tr>
-                                </thead>
-                                <tbody>
 
-                                <tr v-for="item in data.data" :key="item.date">
-
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ item.date }}</td>
-                                    <td class="border-b-2 border-gray-200 px-4 py-3">{{ item.total }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div>
